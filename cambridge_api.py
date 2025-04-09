@@ -3,6 +3,10 @@ import requests
 from bs4 import BeautifulSoup
 
 app = Flask(__name__)
+    @app.route("/")
+def home():
+    return jsonify({"message": "Cambridge IPA API is running!"})
+
 
 def get_ipa_cambridge(word):
     headers = {
@@ -30,6 +34,3 @@ def ipa():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
-    @app.route("/")
-def home():
-    return jsonify({"message": "Cambridge IPA API is running!"})
