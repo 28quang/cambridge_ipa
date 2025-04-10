@@ -27,6 +27,10 @@ def get_ipa():
     ipa = soup.find('span', class_='ipa')
 
     if ipa:
-        return jsonify({'word': word, 'ipa': ipa.text})
+        import codecs
+return jsonify({"ipa": codecs.decode(repr(ipa), 'unicode_escape'), "word": word})
+
     else:
-        return jsonify({'word': word, 'ipa': None})
+        import codecs
+return jsonify({"ipa": codecs.decode(repr(ipa), 'unicode_escape'), "word": word})
+
