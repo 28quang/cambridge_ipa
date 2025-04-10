@@ -3,7 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 
 app = Flask(__name__)
-    @app.route("/")
+@app.route("/")
 def home():
     return jsonify({"message": "Cambridge IPA API is running!"})
 
