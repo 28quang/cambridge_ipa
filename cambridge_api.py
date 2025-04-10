@@ -1,36 +1,40 @@
 from flask import Flask, request, jsonify
 import requests
 from bs4 import BeautifulSoup
+import codecs
 
 app = Flask(__name__)
 
-@app.route('/')
-def home():
-    return 'Cambridge IPA API is running! Try /ipa?word=your_word'
-
-@app.route('/ipa')
-def get_ipa():
-    word = request.args.get('word')
-    if not word:
-        return jsonify({'error': 'Missing word parameter'}), 400
-
+def extract_ipa(word):
     url = f"https://dictionary.cambridge.org/dictionary/english/{word}"
-    headers = {
+    response = requests.get(url, headers={
         "User-Agent": "Mozilla/5.0"
-    }
-    response = requests.get(url, headers=headers)
+    })
+    soup = BeautifulSoup(response.content, "html.parser")
+    
+    ipa_element = soup.find("span", class_="ipa")
+    if ipa_element:
+        return ipa_element.text
+    return None
 
-    if response.status_code != 200:
-        return jsonify({'error': 'Failed to fetch from Cambridge Dictionary'}), 500
+@app.route("/")
+def home():
+    return "Cambridge IPA API is running! Try /ipa?word=your_word"
 
-    soup = BeautifulSoup(response.text, 'html.parser')
-    ipa = soup.find('span', class_='ipa')
-
+@app.route("/ipa")
+def get_ipa():
+    word = request.args.get("word")
+    ipa = extract_ipa(word)
     if ipa:
-        import codecs
-return jsonify({"ipa": codecs.decode(repr(ipa), 'unicode_escape'), "word": word})
-
+        return jsonify({
+            "ipa": codecs.decode(repr(ipa), 'unicode_escape'),
+            "word": word
+        })
     else:
-        import codecs
-return jsonify({"ipa": codecs.decode(repr(ipa), 'unicode_escape'), "word": word})
+        return jsonify({
+            "ipa": "Not found",
+            "word": word
+        })
 
+if __name__ == "__main__":
+    app.run(debug=True)
