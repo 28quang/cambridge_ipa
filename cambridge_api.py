@@ -63,4 +63,31 @@ def get_ipa():
         return jsonify({"word": word, "ipa": ipa})
     else:
         return jsonify({"word": word, "ipa": None, "note": "IPA not found"})
+    from flask import Flask, request, jsonify
+import requests
+from bs4 import BeautifulSoup
+
+app = Flask(__name__)
+
+@app.route('/ipa')
+def get_ipa():
+    word = request.args.get('word')
+    if not word:
+        return jsonify({'error': 'Missing word parameter'}), 400
+
+    url = f"https://dictionary.cambridge.org/dictionary/english/{word}"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36"
+    }
+    response = requests.get(url, headers=headers)
+    soup = BeautifulSoup(response.text, 'html.parser')
+
+    ipa_tag = soup.find("span", class_="ipa")
+    if ipa_tag:
+        ipa = ipa_tag.text.strip()
+        return jsonify({"word": word, "ipa": ipa})
+    else:
+        return jsonify({"word": word, "ipa": None})
+  
+        
 
